@@ -1,5 +1,4 @@
 {
-    "images": "/directoryWithImagesInside",
     "sensorData": {
         "acceloremeter": {
             "x": 0,
