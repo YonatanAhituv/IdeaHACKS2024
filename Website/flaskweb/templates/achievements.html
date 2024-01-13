@@ -1,4 +1,20 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>Achievements</h1>
+    <section>
+        <ul id="achievementList" disabled>
+            <li><input type="checkbox" id="ach1" disabled><label for="ach1">Keep climbing! (Reach 500 ft in altitude)</label></li>
+            <li><input type="checkbox" id="ach2" disabled><label for="ach2">Walk 10000 steps a day (Accelerometer)</label></li>
+            <li><input type="checkbox" id="ach3" disabled><label for="ach3">Run! (Accelerometer)</label></li>
+            <li><input type="checkbox" id="ach4" disabled><label for="ach4">Get your feet wet (Let humidity reach 90%)
+            </label></li>
+
+        </ul>
+        <h3>Points: </h3> 
+        <!-- point calculation in script -->
+    </section>
+
+    <script>
+        // write code to disable check boxes and enable them when certain qualities satisfied
+    </script>
 {% endblock content %}
