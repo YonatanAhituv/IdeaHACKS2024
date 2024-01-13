@@ -1,4 +1,37 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>Home Page</h1>
+    <div class = "table-containter">
+    <table class="dashboard-table">
+        <h3>Yours Stats</h3>
+        <tr><th>Altitude</th><th>Temperature</th><th>Humidity</th><th>Pressure</th>
+        <tr>
+            <td id = "altitude">0</td>
+            <td id = "temperature">0</td>
+            <td id = "humidity">0</td>
+            <td id = "pressure">0</td>
+            <!-- add code for plant image -->
+        </tr>
+    </table>
+    </div>
+    <script>
+        setInterval(function() {
+            fetch('/data_json').then(
+                response => response.json()
+            ).then(
+                data => data.forEach(reading => updateElement(reading))
+            )
+        }, 10);
+        
+        function updateElement(reading) {
+            Object.entries(reading).forEach(([k,v]) => {
+                element = document.getElementById(k);
+                previousValue = element.innerHTML;
+
+                if(previousValue !== v.toString()) {
+                    element.innerHTML = v.toString();
+                }
+            })
+        }
+    </script>
 {% endblock content %}
