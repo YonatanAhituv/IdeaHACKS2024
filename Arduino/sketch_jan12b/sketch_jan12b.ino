@@ -1,9 +1,12 @@
-void setup() {
-  // put your setup code here, to run once:
+int flashPin = 4;
 
+void setup() {
+    pinMode(flashPin, OUTPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+    digitalWrite(flashPin, HIGH);
+    delay(200);
+    digitalWrite(flashPin, LOW);
+    delay(200);
 }
