@@ -1,20 +1,23 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>Encyclopedia</h1>
-    {% if array_length == 0 %}
+    {% if num_plants == 0 %}
     <div style="text-align:center">
     <h2>No entries in the encyclopedia. </h2>
     <p>Find some plants and come back later.</p>
     </div>
     {% else %}
     <table class="encyclopediaTable">
-        <tr><th>Plant nameName</th><th>Image</th>
-        {% for plant in plant_array %}
+        <tr><th>Plant name</th><th>Image</th>
+        {% for plant in plant_dict %}
         <tr>
-            <td>{{ plant }}</td>
-            <!-- add code for plant image -->
+            <td>{{ plant.name }}</td>
+            <td>
+                <img src = {{ plant.image_url }}>
+            </td>>
         </tr>
         {% endfor %}
     </table>
     {% endif %}
+    
 {% endblock content %}
