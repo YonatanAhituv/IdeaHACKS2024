@@ -3,15 +3,27 @@
     <h1>Achievements</h1>
     <section>
         <ul id="achievementList" disabled>
-            <li><input type="checkbox" id="ach1" {{ check1 }} disabled><label for="ach1">Keep climbing! (Reach 500 ft in altitude)</label></li>
-            <li><input type="checkbox" id="ach2" {{ check2 }} disabled><label for="ach2">Walk 10000 steps a day (Accelerometer)</label></li>
+            <div id = "checks">
+            <li><input type="checkbox" id="ach1" {{ check1 }} disabled><label for="ach1">On top of the world (Reach 500 ft in altitude)</label></li>
+            </div>
+            <div id = "checks">
+            <li><input type="checkbox" id="ach2" {{ check2 }} disabled><label for="ach2">Walkstar (Accelerometer)</label></li>
+            </div>
+            <div id = "checks">
             <li><input type="checkbox" id="ach3" {{ check3 }} disabled><label for="ach3">Run! (Accelerometer)</label></li>
-            <!-- <li><input type="checkbox" id="ach4" {{ check4 }} disabled><label for="ach4">Get your feet wet (Let humidity reach 90%) -->
-            </label></li>
+            </div>
+            <div id = "checks">
+            <li><input type="checkbox" id="ach4" {{ check4 }} disabled><label for="ach4">Tropic Temperature Titan</label></li>
+            </div>
+            <div id = "checks">
+            <li><input type="checkbox" id="ach5" {{ check5 }} disabled><label for="ach5">Chill Conqueror Crest</label></li>
+            </div>
 
+            </label></li>
         </ul>
         <h3>Points: </h3> 
         <!-- point calculation in script -->
+
     </section>
 
     <script>
