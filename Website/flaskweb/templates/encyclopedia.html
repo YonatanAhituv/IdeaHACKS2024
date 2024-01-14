@@ -7,13 +7,13 @@
     <p>Find some plants and come back later.</p>
     </div>
     {% else %}
-    <table class="encyclopediaTable">
+    <table class="dashboard-table">
         <tr><th>Plant name</th><th>Image</th>
         {% for plant in plant_dict %}
         <tr>
-            <td>{{ plant.name }}</td>
+            <td>{{ plant_dict[plant].name }}</td>
             <td>
-                <img src = {{ plant.image_url }}>
+                <img id = "plant-image" src = {{ plant_dict[plant].image_url }}>
             </td>>
         </tr>
         {% endfor %}
