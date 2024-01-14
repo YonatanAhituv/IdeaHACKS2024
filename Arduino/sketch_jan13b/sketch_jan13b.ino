@@ -21,6 +21,10 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
+
+#define BUTTON 34  // must be an analog pin, use "An" notation!
+
+
 Adafruit_MPU6050 mpu;
 // For the Adafruit shield, these are the default.
 #define TFT_DC 4
@@ -33,6 +37,8 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 void setup() {
   Serial.begin(9600);
+  Wire.begin();
+  pinMode(BUTTON, INPUT);
   Serial.println("ILI9341 Test!"); 
  
   tft.begin();
@@ -118,20 +124,30 @@ void setup() {
   }
 
   Serial.println("");
+  printData();
 }
 
 
 void loop(void) {
-  printData();
-  delay(50);
+  // we have some minimum pressure we consider 'valid'
+  // pressure of 0 means no pressing!
+  if (digitalRead(BUTTON) == HIGH) {
+     //Serial.println(digitalRead(BUTTON));
+     printData();
+
+  } else {
+    //Serial.println(digitalRead(BUTTON));
+  }
+  delay(100);
+  
 }
 
 
 void printData() {
   tft.fillScreen(ILI9341_BLACK);
-  unsigned long start = micros();
   tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(3);
+  tft.setTextColor(ILI9341_WHITE);  
+  tft.setTextSize(2);
   /* Get new sensor events with the readings */
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
@@ -156,6 +172,6 @@ void printData() {
   tft.print("Temperature: ");
   tft.print(temp.temperature);
   tft.println(" degC");
-
+  
   tft.println("");
 }
