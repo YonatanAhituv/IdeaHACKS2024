@@ -20,6 +20,23 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
+#include <Arduino.h>
+#include <WiFi.h>
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
+#include <ArduinoJson.h>
+
+const char* ssid = "ZENBOOK 7206";
+const char* password = "T508?s52";
+
+String serverName = "192.168.137.222";   // REPLACE WITH YOUR Raspberry Pi IP ADDRESS
+
+String serverPath = "/push_sensors";     // The default serverPath should be upload.php
+
+const int serverPort = 5000;
+
+WiFiClient client;
+
 
 
 #define BUTTON 34  // must be an analog pin, use "An" notation!
@@ -35,7 +52,19 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 // If using the breakout, change pins as desired
 //Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_CLK, TFT_RST, TFT_MISO);
 
+
+float xval[100] = {0};
+float yval[100] = {0};
+float zval[100] = {0};
+float xavg;
+float yavg;
+float zavg;
+float threshold = 2.0;
+  
+int steps = 0;
+
 void setup() {
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); 
   Serial.begin(9600);
   Wire.begin();
   pinMode(BUTTON, INPUT);
@@ -125,14 +154,26 @@ void setup() {
 
   Serial.println("");
   printData();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+  }
+  Serial.println("Connected");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
 }
 
 
 void loop(void) {
+  updateSteps();
   // we have some minimum pressure we consider 'valid'
   // pressure of 0 means no pressing!
   if (digitalRead(BUTTON) == HIGH) {
      //Serial.println(digitalRead(BUTTON));
+     sendData();
      printData();
 
   } else {
@@ -142,6 +183,111 @@ void loop(void) {
   
 }
 
+void updateSteps() {
+   sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+  float totvect[100]={0};
+  float totave[100]={0};
+  float xaccl[100]={0};
+   float yaccl[100]={0};
+    float zaccl[100]={0};
+   
+  int stepsToAdd = 0;
+for (int i=1;i<100;i++)
+{
+  xaccl[i]=a.acceleration.x;
+  delay(1);
+  yaccl[i]=a.acceleration.y;
+  delay(1);
+  zaccl[i]=a.acceleration.z;
+  delay(1);
+  totvect[i] = sqrt(((xaccl[i]-xavg)* (xaccl[i]-xavg))+ ((yaccl[i] - yavg)*(yaccl[i] - yavg)) + ((zval[i] - zavg)*(zval[i] - zavg)));
+  totave[i] = (totvect[i] + totvect[i-1]) / 2 ;
+
+//cal steps 
+if (totave[i]>threshold)
+{
+  stepsToAdd++;
+}
+}
+stepsToAdd /= 50;
+steps += stepsToAdd;
+}
+
+void sendData() {
+  String getAll;
+  String getBody;
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+  //String fb = "{\"steps\":"+String(steps)+"\n\"temperature\":"+ String(temp.temperature) + "\n}";
+  if (client.connect(serverName.c_str(), serverPort)) {
+    Serial.println("Connection successful!");    
+    StaticJsonBuffer<200> jsonBuffer;
+  
+  // Build your own object tree in memory to store the data you want to send in the request
+  JsonObject& root = jsonBuffer.createObject();
+  root["steps"] = steps;
+  root["temperature"] = temp.temperature;
+  
+  // Generate the JSON string
+  root.printTo(Serial);
+  
+  Serial.print("POST ");
+  Serial.println(serverPath);
+
+  client.print("POST ");
+  client.print(serverPath);
+  client.println(" HTTP/1.1");
+  client.print("Host: ");
+  client.println(WiFi.localIP());
+  client.println("Connection: close\r\nContent-Type: application/json");
+  client.print("Content-Length: ");
+  client.print(root.measureLength());
+  client.print("\r\n");
+  client.println();
+  root.printTo(client);
+
+    // String head = "Content-Type: application/json\r\nAccept: application/json\r\n\r\n";
+
+    // uint32_t jsonLength = fb.length();
+    // uint32_t extraLen = head.length() + tail.length();
+    // uint32_t totalLen = jsonLength + extraLen;
+  
+    // client.println("POST " + serverPath + " HTTP/1.1");
+    // client.println("Host: " + serverName);
+    // client.print(head);
+    // client.println("Content-Length: " + String(totalLen));
+    // client.println(fb);
+    
+    
+    int timoutTimer = 10000;
+    long startTimer = millis();
+    boolean state = false;
+    
+    while ((startTimer + timoutTimer) > millis()) {
+      Serial.print(".");
+      delay(100);      
+      while (client.available()) {
+        char c = client.read();
+        if (c == '\n') {
+          if (getAll.length()==0) { state=true; }
+          getAll = "";
+        }
+        else if (c != '\r') { getAll += String(c); }
+        if (state==true) { getBody += String(c); }
+        startTimer = millis();
+      }
+      if (getBody.length()>0) { break; }
+    }
+    Serial.println();
+    client.stop();
+    Serial.println(getBody);
+  }
+  else {
+    getBody = "Connection to " + serverName +  " failed.";
+    Serial.println(getBody);
+  }
+}
 
 void printData() {
   tft.fillScreen(ILI9341_BLACK);
@@ -172,6 +318,9 @@ void printData() {
   tft.print("Temperature: ");
   tft.print(temp.temperature);
   tft.println(" degC");
+
+   tft.print("Steps: ");
+  tft.print(steps);
   
   tft.println("");
 }

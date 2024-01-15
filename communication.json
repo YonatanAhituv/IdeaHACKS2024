@@ -1,18 +1,4 @@
 {
-    "sensorData": {
-        "acceloremeter": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-        },
-        "gyroscope": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-        },
-        "altitude": 0,
-        "temperature": 0,
-        "humidity": 0,
-        "pressure": 0,
-    }
+    "steps": 0,
+    "temperature": 0
 }
